@@ -1,9 +1,11 @@
 {
   "name": "polymer-service-monitor",
+  "description": "A service monitor built with Polymer",
+  "private": true,
   "authors": [
     "Riyad Preukschas <riyad@informatik.uni-bremen.de>"
   ],
-  "description": "Service Monitor built with Polymer",
+  "main": "index.html",
   "license": "MIT",
   "dependencies": {
     "iron-ajax": "PolymerElements/iron-ajax",
