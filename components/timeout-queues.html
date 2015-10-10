@@ -1,0 +1,155 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="jquery-import.html">
+<link rel="import" href="flot-sparklines.html">
+<link rel="import" href="flot-sparklines-legend.html">
+
+<dom-module id="timeout-queues">
+  <style>
+    #chart {
+      height: 50px;
+      width: 250px;
+    }
+    #loader {
+      margin-right: -1.2857em;
+    }
+    #name {
+      padding-left: 2rem;
+    }
+  </style>
+  <template>
+    <iron-ajax
+        id="ajax"
+        handle-as="json"
+        on-response="_handleResponse"
+        on-request="_handleLoading">
+    </iron-ajax>
+    <div class="ui middle aligned grid">
+      <div id="name" class="five wide column">
+        <span>{{displayName}}</span>
+        <div id="loader" class="ui mini inline loader"></div>
+      </div>
+      <div class="eleven wide right floated column">
+        <flot-sparklines id="chart" item-name="message(s)"></flot-sparklines>
+        <flot-sparklines-legend id="legend"></flot-sparklines-legend>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  "use strict";
+
+  var SECONDS = 1000;
+
+  Polymer({
+    is: "timeout-queues",
+
+    properties: {
+    displayName: String,
+      generationPrefix: {
+        type: String,
+        value: "-gen",
+      },
+      generations: {
+        type: Number,
+        value: 5,
+      },
+      namePrefix: {
+        type: String,
+        value: "toq-",
+      },
+      refreshInterval: {
+        type: Number,
+        value: 30,
+        observer: "refresh",
+      },
+      url: String,
+      vhost: {
+        type: String,
+        value: '/',
+      },
+    },
+
+    observers: [
+      "_updateUrl(url, vhost)",
+    ],
+
+    ready: function() {
+      let options = {
+        colors: [
+          '#6dcdf9', /* light blue 200 */
+          '#03a9f9', /* light blue 600 */
+          '#176fd2', /* blue 800 */
+          '#8966c7', /* deep purple 400 */
+          '#4c2bb0', /* deep purple 800 */
+        ],
+      };
+      this._chart_data = [];
+      for (let gen=0; gen < this.generations; gen++) {
+        this._chart_data.push({
+          label: "Generation "+gen,
+          data: [],
+        });
+      };
+
+      this.$.chart.options = options;
+    },
+
+    refresh: function() {
+      clearInterval(this._interval);
+      if (this.refreshInterval > 0) {
+        this._interval = setInterval(
+          this.$.ajax.generateRequest.bind(this.$.ajax),
+          this.refreshInterval*SECONDS
+        );
+      }
+    },
+
+    _handleLoading: function() {
+      $(this.$.loader).addClass('active');
+    },
+
+    _handleResponse: function(e) {
+      let xhr = e.detail.xhr;
+      let data = xhr.response;
+
+      let counts = new Array(this.generations);
+      counts.fill(0);
+      for (let queue of data) {
+        if (queue.name.startsWith(this.namePrefix)) {
+          for (let gen=0; gen < this.generations; gen++) {
+            if (queue.name.indexOf(this.generationPrefix + gen) != -1) {
+              counts[gen]++;
+            }
+          }
+        }
+      }
+
+      let d = new Date();
+      for (let gen=0; gen < this.generations; gen++) {
+        this._chart_data[gen].data.push([d, counts[gen]]);
+      }
+
+      // somehow it won't show anything if chart_data is the same every time
+      let new_chart_data = [];
+      for (let gen=0; gen < this.generations; gen++) {
+        new_chart_data.push(this._chart_data[gen]);
+      }
+      this._chart_data = new_chart_data;
+
+      $(this.$.loader).removeClass('active');
+      this.$.chart.data = this._chart_data;
+      this.$.legend.data = this._chart_data;
+    },
+
+    _updateUrl: function(url, vhost) {
+      if (typeof url !== 'undefined' && url != null
+          && typeof vhost !== 'undefined' && vhost != null) {
+        vhost = encodeURIComponent(vhost);
+        this.$.ajax.url = url + "/api/queues/" + vhost;
+        this.$.ajax.generateRequest();
+      }
+    },
+  });
+</script>

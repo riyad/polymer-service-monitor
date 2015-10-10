@@ -1,0 +1,115 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer-flot/flot-chart.html">
+<link rel="import" href="../bower_components/polymer-flot/flot-threshold-plugin.html">
+<link rel="import" href="../bower_components/polymer-flot/flot-time-plugin.html">
+<link rel="import" href="jquery-dateformat-plugin.html">
+
+<dom-module id="flot-sparklines">
+  <style>
+    :host {
+      display: inline-block;
+    }
+
+    #chart {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <template>
+    <flot-chart id="chart"></flot-chart>
+  </template>
+</dom-module>
+
+<script>
+  "use strict";
+
+  Polymer({
+    is: "flot-sparklines",
+
+    properties: {
+      data: {
+        type: Object,
+        value: function() { return []; },
+        observer: '_dataChanged',
+      },
+      itemName: {
+        type: String,
+        value: "item(s)",
+        observer: '_itemNameChanged',
+      },
+      defaultOptions: {
+        type: Object,
+        readOnly: true,
+        value: function() {
+          return {
+            grid: {
+              borderWidth: 0,
+              margin: 0,
+              hoverable: true,
+            },
+            legend: {show: false},
+            lines: {
+              show: true,
+            },
+            shadowSize: 0,
+            xaxis: {
+              show: false,
+              mode: 'time',
+              timezone: 'browser',
+            },
+            yaxis: {
+              show: false,
+            },
+          };
+        },
+      },
+      options: {
+        type: Object,
+        value: function() { return {}; },
+        observer: '_optionsChanged',
+      },
+    },
+    _dataChanged: function(newValue, oldValue) {
+      this.$.chart.data = newValue;
+    },
+    _itemNameChanged: function(newValue, oldValue) {
+      $(this.$.chart)
+        .off('plothover', this._onPlotHover)
+        .on('plothover', this._onPlotHover.bind(this));
+    },
+    _optionsChanged: function (newValue, oldValue) {
+      let options = $.extend(true, this.defaultOptions, newValue);
+      this.$.chart.options = options;
+    },
+    _isSamePlotItem: function(d1, d2) {
+        return d1 != null
+            && d2 != null
+            && d1.seriesIndex === d2.seriesIndex
+            && d1.dataIndex === d2.dataIndex;
+    },
+    _onPlotHover: function (event, pos, item) {
+      let chart_elem = $(this.$.chart);
+      if (item) {
+        let date = new Date(item.datapoint[0]);
+        let count = item.datapoint[1];
+        let tooltip_html = "" + count + " " + this.itemName + " " + $.format.prettyDate(date);
+        if (item.series.label) {
+          tooltip_html = item.series.label + "<br/>" + tooltip_html;
+        }
+        if (!this._isSamePlotItem(this._last_plothover_item, item)) {
+          chart_elem.popup({
+            html: tooltip_html,
+            position: 'bottom center',
+            variation: 'inverted',
+            on: 'manual',
+          });
+          chart_elem.popup('show');
+          this._last_plothover_item = item;
+        }
+      } else {
+        chart_elem.popup('hide');
+        this._last_plothover_item = null;
+      }
+    },
+  });
+</script>

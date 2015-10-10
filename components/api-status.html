@@ -1,0 +1,158 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="jquery-import.html">
+
+<dom-module id="api-status">
+  <style>
+    #status .column {
+      padding-top: .5rem;
+      padding-bottom: .5rem;
+    }
+    #status .header {
+      color: rgba(255,255,255,.84);
+      margin: 0;
+    }
+  </style>
+  <template>
+    <iron-ajax
+        id="ajax"
+        handle-as="text"
+        on-response="_handleResponse"
+        on-error="_handleError"
+        on-request="_handleLoading">
+    </iron-ajax>
+    <div id="status" class="ui padded middle aligned two column default status grid">
+      <div class="ui small header column">{{displayName}}</div>
+      <div class="right floated right aligned column">
+        <span id="error_label"></span>
+        <div id="loader" class="ui mini inverted inline loader"></div>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  "use strict";
+
+  var SECONDS = 1000;
+
+  Polymer({
+    is: "api-status",
+
+    properties: {
+      displayName: String,
+      refreshInterval: {
+        type: Number,
+        value: 30,
+        observer: "refresh",
+      },
+      url: String,
+    },
+
+    observers: [
+      "_updateUrl(url)",
+    ],
+
+    refresh: function() {
+      clearInterval(this._interval);
+      if (this.refreshInterval > 0) {
+        this._interval = setInterval(
+          this.$.ajax.generateRequest.bind(this.$.ajax),
+          this.refreshInterval*SECONDS
+        );
+      }
+    },
+
+    _handleError: function(e, error) {
+      let xhr = error.request.xhr;
+
+      let status_elem = $(this.$.status);
+      let error_label_elem = $(this.$.error_label);
+      let status = "";
+      let error_label = "";
+      let error_detail = "";
+
+      let data = this._parseResponseError(xhr);
+      switch(xhr.status) {
+        case 0:
+          status = 'error';
+          error_label = "can't reach host";
+          break;
+        case 401:
+          status = 'warning';
+          error_label = "not authorized";
+          error_detail = data.reason;
+          break;
+        case 404:
+          status = 'error';
+          error_label = "not found";
+          error_detail = data.reason;
+          break;
+        default:
+          status = 'error';
+          error_label = data.status;
+          error_detail = data.reason;
+      }
+
+      $(this.$.loader).removeClass('active');
+      error_label_elem.text(error_label);
+      error_label_elem.popup({
+        content: error_detail,
+        position: 'left center',
+        variation: 'inverted'
+      });
+      status_elem.removeClass('default error warning ok').addClass(status);
+    },
+
+    _handleLoading: function() {
+      $(this.$.loader).addClass('active');
+      $(this.$.error_label).html("");
+    },
+
+    _handleResponse: function(e) {
+      let xhr = e.detail.xhr;
+
+      let status_elem = $(this.$.status);
+      let error_label_elem = $(this.$.error_label);
+      let status = "";
+      let error_label = "";
+
+      switch (xhr.status) {
+        case 0:
+          status = 'error';
+          error_label = "can't reach host";
+          break;
+        default:
+          status = 'ok';
+          error_label = "";
+      }
+
+      $(this.$.loader).removeClass('active');
+      error_label_elem.text(error_label);
+      status_elem.removeClass('default error warning ok').addClass(status);
+    },
+
+    _parseResponseError: function (xhr) {
+      try {
+        let data = JSON.parse(xhr.response);
+        if (!('error' in data)) {
+          data.error = xhr.statusText;
+        }
+        return data;
+      } catch(e) {
+        return {
+          error: xhr.statusText,
+          status: xhr.status,
+          reason: xhr.response.trim(),
+        };
+      }
+    },
+
+    _updateUrl: function(url) {
+      if (typeof url !== 'undefined' && url != null) {
+        this.$.ajax.url = url;
+        this.$.ajax.generateRequest();
+      }
+    },
+  });
+</script>

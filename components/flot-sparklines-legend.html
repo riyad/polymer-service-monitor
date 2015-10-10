@@ -1,0 +1,101 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="jquery-import.html">
+
+<dom-module id="flot-sparklines-legend">
+  <style>
+    :host {
+      display: inline-block;
+    }
+
+    #current_value {
+      display: table-row;
+      font-size: 1rem;
+      line-height: 1.3em;
+    }
+    #max_value,
+    #min_value {
+      color: #9e9e9e;  /* grey 500 */
+      display: table-row;
+      font-size: 0.8rem;
+      line-height: 1.3em;
+    }
+  </style>
+  <template>
+    <div id="legend">
+      <span id="max_value"></span>
+      <span id="current_value"></span>
+      <span id="min_value"></span>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  "use strict";
+
+  Polymer({
+    is: "flot-sparklines-legend",
+
+    properties: {
+      data: {
+        type: Array,
+        value: function() { return []; },
+      },
+      current_value: {
+        type: Number,
+        computed: '_computeCurrentValue(data)',
+      },
+      max_value: {
+        type: Number,
+        computed: '_computeMaxValue(data)',
+      },
+      min_value: {
+        type: Number,
+        computed: '_computeMinValue(data)',
+      },
+    },
+
+    observers: [
+      '_updateValues(data)',
+    ],
+
+    _dataValues: function() {
+        return this.data.map(function(series) {
+          // series may be an object or array
+          // make sure we have an array of data points
+          if ('data' in series) {
+            series = series.data;
+          }
+          return series.map(function(point){
+            return point[1];
+          })
+        });
+    },
+
+    _computeCurrentValue: function () {
+      let data_values_for_series = this._dataValues();
+      return data_values_for_series.map(function(series) {return series[series.length-1]}).reduce(function(sum, val){return sum+val;}, 0);
+    },
+
+    _computeMaxValue: function () {
+      let data_values_for_series = this._dataValues();
+      if (data_values_for_series.length === 0) {
+        return 0;
+      }
+      return Math.max.apply(null, data_values_for_series.map(function(values) {return Math.max.apply(null, values);}));
+    },
+
+    _computeMinValue: function() {
+      let data_values_for_series = this._dataValues();
+      if (data_values_for_series.length === 0) {
+        return 0;
+      }
+      return Math.min.apply(null, data_values_for_series.map(function(values) {return Math.min.apply(null, values);}));
+    },
+
+    _updateValues: function() {
+      $(this.$.max_value).html(this.max_value != this.current_value ? this.max_value : "&nbsp");
+      $(this.$.current_value).html(this.current_value);
+      $(this.$.min_value).html(this.min_value != this.current_value ? this.min_value : "&nbsp");
+    },
+  });
+</script>

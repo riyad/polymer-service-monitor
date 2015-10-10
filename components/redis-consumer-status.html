@@ -1,0 +1,153 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="jquery-import.html">
+
+<dom-module id="redis-consumer-status">
+  <style>
+    #status .column {
+      padding-top: .3rem;
+      padding-bottom: .3rem;
+    }
+  </style>
+  <template>
+    <iron-ajax
+        id="ajax"
+        with-credentials
+        handle-as="json"
+        on-response="_handleResponse"
+        on-error="_handleError"
+        on-request="_handleLoading">
+    </iron-ajax>
+    <div id="status" class="ui padded middle aligned two column default status grid">
+      <div class="ui column">{{displayName}}</div>
+      <div class="right floated right aligned column">
+        <div id="label" class="ui inverted small label">
+          <span id="error_label"></span>
+          <div id="messages_count" class="detail"></div>
+        </div>
+        <div id="loader" class="ui mini inverted inline loader"></div>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  "use strict";
+
+  var SECONDS = 1000;
+
+  Polymer({
+    is: "redis-consumer-status",
+
+    properties: {
+      displayName: String,
+      refreshInterval: {
+        type: Number,
+        value: 30,
+        observer: "refresh",
+      },
+      url: String,
+    },
+
+    observers: [
+      "_updateUrl(url)",
+    ],
+
+    refresh: function() {
+      clearInterval(this._interval);
+      if (this.refreshInterval > 0) {
+        this._interval = setInterval(
+          this.$.ajax.generateRequest.bind(this.$.ajax),
+          this.refreshInterval*SECONDS
+        );
+      }
+    },
+
+    _handleError: function(e, error) {
+      let xhr = error.request.xhr;
+
+      let status_elem = $(this.$.status);
+      let label_elem = $(this.$.label);
+      let error_label_elem = $(this.$.error_label);
+      let messages_count_elem = $(this.$.messages_count);
+      let status_elems = $([status_elem, label_elem]).map(function () {return this.toArray(); } );
+      let status = "";
+      let error_label = "";
+      let error_detail = "";
+
+      switch(xhr.status) {
+        case 0:
+          status = 'error';
+          error_label = "can't reach host";
+          break;
+        case 403:
+          status = 'warning';
+          error_label = "forbidden";
+          break;
+        default:
+          status = 'error';
+          error_label = data.status;
+      }
+      error_detail = `${xhr.status} ${xhr.statusText}`;
+
+      $(this.$.loader).removeClass('active');
+      error_label_elem.text(error_label);
+      error_label_elem.popup({
+        content: error_detail,
+        position: 'left center',
+        variation: 'inverted'
+      });
+      status_elems.removeClass('default error warning ok').addClass(status);
+    },
+
+    _handleLoading: function(e) {
+      $(this.$.loader).addClass('active');
+      $(this.$.error_label).text("");
+    },
+
+    _handleResponse: function(e) {
+      let xhr = e.detail.xhr;
+
+      let status_elem = $(this.$.status);
+      let label_elem = $(this.$.label);
+      let error_label_elem = $(this.$.error_label);
+      let messages_count_elem = $(this.$.messages_count);
+      let status_elems = $([status_elem, label_elem]).map(function () {return this.toArray(); } );
+      let status = "";
+      let error_label = "";
+
+      let data = xhr.response;
+      switch (xhr.status) {
+        case 0:
+          status = 'error';
+          error_label = "can't reach host";
+          break;
+        default:
+          if (data.PUBSUB > 0) {
+            status = 'ok';
+            error_label = "";
+          } else {
+            status = 'warning';
+            error_label = "no consumers";
+          }
+      }
+
+      $(this.$.loader).removeClass('active');
+      error_label_elem.text(error_label);
+      status_elems.removeClass('default error warning ok').addClass(status);
+    },
+
+    _updateUrl: function(url) {
+      if (typeof url !== 'undefined' && url != null) {
+        let match = url.match(/^(https?:\/\/)(.+):(.+)@(.+)/i);
+        if (match !== null) {
+          let auth = `${match[2]}:${match[3]}`;
+          url = `${match[1]}${match[4]}`;
+          this.$.ajax.headers = {"Authorization": `Basic ${btoa(auth)}`}
+        }
+        this.$.ajax.url = `${url}/PUBSUB/NUMPAT`;
+        this.$.ajax.generateRequest();
+      }
+    },
+  });
+</script>

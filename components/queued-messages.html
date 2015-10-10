@@ -1,0 +1,127 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="jquery-import.html">
+<link rel="import" href="flot-sparklines.html">
+<link rel="import" href="flot-sparklines-legend.html">
+
+<dom-module id="queued-messages">
+  <style>
+    .ui.grid>.column {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    #chart {
+      height: 50px;
+      width: 250px;
+    }
+    #loader {
+      margin-right: -1.2857em;
+    }
+    #name {
+      padding-left: 2rem;
+    }
+  </style>
+  <template>
+    <iron-ajax
+        id="ajax"
+        handle-as="json"
+        on-response="_handleResponse"
+        on-request="_handleLoading">
+    </iron-ajax>
+    <div class="ui middle aligned grid">
+      <div id="name" class="five wide column">
+        <span>{{displayName}}</span>
+        <div id="loader" class="ui mini inline loader"></div>
+      </div>
+      <div class="eleven wide right floated column">
+        <flot-sparklines id="chart" item-name="message(s)"></flot-sparklines>
+        <flot-sparklines-legend id="legend"></flot-sparklines-legend>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  "use strict";
+
+  var SECONDS = 1000;
+
+  Polymer({
+    is: "queued-messages",
+
+    properties: {
+      displayName: String,
+      name: String,
+      refreshInterval: {
+        type: Number,
+        value: 30,
+        observer: "refresh",
+      },
+      url: String,
+      vhost: {
+        type: String,
+        value: '/',
+      },
+    },
+
+    observers: [
+      "_updateUrl(url, vhost, name)",
+    ],
+
+    ready: function() {
+      this._points = [];
+      let options = {
+        series: {
+          color: "#f44336", /* red 500 */
+          threshold: [{
+            below: 500,
+            color: "#ffb300", /* amber 600 */
+          },{
+            below: 300,
+            color: "#43a047", /* green 600  */
+          }],
+        }
+      };
+
+      this.$.chart.options = options;
+    },
+
+    refresh: function() {
+      clearInterval(this._interval);
+      if (this.refreshInterval > 0) {
+        this._interval = setInterval(
+          this.$.ajax.generateRequest.bind(this.$.ajax),
+          this.refreshInterval*SECONDS
+        );
+      }
+    },
+
+    _handleLoading: function() {
+      $(this.$.loader).addClass('active');
+    },
+
+    _handleResponse: function(e) {
+      let xhr = e.detail.xhr;
+      let data = xhr.response;
+
+      this._points.push([new Date(), data.messages]);
+      // somehow it won't show anything if chart_data is the same every time
+      let chart_data = [this._points];
+
+      $(this.$.loader).removeClass('active');
+      this.$.chart.data = chart_data;
+      this.$.legend.data = chart_data;
+    },
+
+    _updateUrl: function(url, vhost, name) {
+      if (typeof url !== 'undefined' && url != null
+          && typeof vhost !== 'undefined' && vhost != null) {
+        name = encodeURIComponent(name);
+        vhost = encodeURIComponent(vhost);
+        this.$.ajax.url = url + '/api/queues/' + vhost + '/' + name;
+        this.$.ajax.generateRequest();
+      }
+    },
+  });
+</script>
