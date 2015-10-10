@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <title>Service Monitor</title>
+
+    <link rel="stylesheet" href="bower_components/semantic-ui/dist/semantic.min.css">
+    <link rel="stylesheet" href="css/status.css">
+    <style>
+      #pop-apis .header,
+      #pop-queues .header {
+        margin-bottom: .3rem;
+      }
+
+      #pop-queues > * > .column,
+      #pop-special-consumers > * > .column {
+        padding-bottom: 0;
+      }
+    </style>
+
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="components/api-status.html">
+    <link rel="import" href="components/queued-messages.html">
+    <link rel="import" href="components/rabbitmq-consumer-status.html">
+    <link rel="import" href="components/redis-consumer-status.html">
+    <link rel="import" href="components/timeout-queues.html">
+  </head>
+  <body>
+    <section id="pop-apis">
+      <div class="ui equal width grid">
+        <div class="column">
+          <h3 class="ui centered header">Live</h3>
+          <api-status data-env="live" data-name="service_a1" display-name="Service A 1"></api-status>
+          <api-status data-env="live" data-name="service_a2" display-name="Service A 2"></api-status>
+          <api-status data-env="live" data-name="service_b"  display-name="Service B"></api-status>
+        </div>
+
+        <div class="column">
+          <h3 class="ui centered header">Staging</h3>
+          <api-status data-env="staging" data-name="service_a" display-name="Service A"></api-status>
+          <api-status data-env="staging" data-name="service_b" display-name="Service B"></api-status>
+          <api-status data-env="staging" data-name="service_c" display-name="Service C"></api-status>
+        </div>
+      </div>
+    </section>
+
+    <section id="pop-queues">
+      <div class="ui equal width grid">
+        <div class="column">
+          <h3 class="ui centered header">Live <small class="sub header">clusterX</small></h3>
+          <queued-messages data-env="live" name="some_queue" display-name="some queue"></queued-messages>
+          <timeout-queues data-env="live" display-name="on timeout"></timeout-queues>
+        </div>
+
+        <div class="column">
+          <h3 class="ui centered header">Staging <small class="sub header">clusterY</small></h3>
+          <queued-messages data-env="staging" name="some_queue" display-name="some queue"></queued-messages>
+          <timeout-queues data-env="staging" display-name="on timeout"></timeout-queues>
+        </div>
+      </div>
+    </section>
+
+    <section id="pop-special-consumers">
+      <div class="ui equal width grid">
+        <div class="column">
+          <rabbitmq-consumer-status data-env="live-legacy" name="queue_for_shovel_a" display-name="AMQP Shovel A"></rabbitmq-consumer-status>
+        </div>
+        <div class="column">
+        </div>
+      </div>
+    </section>
+
+    <section id="pop-consumers">
+      <div class="ui equal width grid">
+        <div class="column">
+          <rabbitmq-consumer-status data-env="live" name="queue_for_consumer_a" display-name="AMQP Consumer A"></rabbitmq-consumer-status>
+          <rabbitmq-consumer-status data-env="live" name="queue_for_consumer_b" display-name="AMQP Consumer B"></rabbitmq-consumer-status>
+          <rabbitmq-consumer-status data-env="live" name="queue_for_consumer_c" display-name="AMQP Consumer C"></rabbitmq-consumer-status>
+          <redis-consumer-status data-env="live"                            display-name="Redis Consumer A"></redis-consumer-status>
+        </div>
+
+        <div class="column">
+          <rabbitmq-consumer-status data-env="staging" name="queue_for_consumer_a"  display-name="AMQP Consumer A"></rabbitmq-consumer-status>
+          <rabbitmq-consumer-status data-env="staging" name="queue_for_consumer_b"  display-name="AMQP Consumer B"></rabbitmq-consumer-status>
+          <rabbitmq-consumer-status data-env="staging" name="queue_for_consumer_c"  display-name="AMQP Consumer C"></rabbitmq-consumer-status>
+          <redis-consumer-status data-env="staging"                             display-name="Redis Consumer A"></redis-consumer-status>
+        </div>
+      </div>
+    </section>
+
+    <script src="bower_components/semantic-ui/dist/semantic.min.js"></script>
+    <script src="js/config.js"></script>
+    <script>
+      "use strict";
+
+      $(function() {
+        $('api-status').each(function() {
+          let apiConfig = config[$(this).data('env')][$(this).data('name')];
+          $(this).attr('url', apiConfig['endpoint']);
+        });
+
+        $('rabbitmq-consumer-status, queued-messages, timeout-queues').each(function() {
+          let consumerConfig = config[$(this).data('env')]['rabbitmq'];
+          $(this)
+            .attr('vhost', consumerConfig['vhost'])
+            .attr('url', consumerConfig['endpoint']);
+        });
+
+        $('redis-consumer-status').each(function() {
+          let consumerConfig = config[$(this).data('env')]['redis'];
+          $(this)
+            .attr('url', consumerConfig['endpoint']);
+        });
+      });
+    </script>
+  </body>
+</html>
