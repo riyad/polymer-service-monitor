@@ -1,0 +1,31 @@
+
+.inverted.default.label {
+  background-color: white;
+  color: rgba(0,0,0,.84)!important;
+}
+.inverted.error.label {
+  background-color: #e74b47;
+}
+.inverted.ok.label {
+  background-color: #4caf50;
+}
+.inverted.warning.label {
+  background-color: #eba500;
+}
+
+
+.default.status {
+  color: rgba(0,0,0,.84);
+}
+.error.status {
+  background-color: #e74b47;
+  color: rgba(255,255,255,.84);
+}
+.ok.status {
+  background-color: #4caf50;
+  color: rgba(255,255,255,.84);
+}
+.warning.status {
+  background-color: #eba500;
+  color: rgba(255,255,255,.84);
+}
