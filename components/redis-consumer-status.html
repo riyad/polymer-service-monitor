@@ -117,19 +117,12 @@
       var error_label = "";
 
       var data = xhr.response;
-      switch (xhr.status) {
-        case 0:
-          status = 'error';
-          error_label = "can't reach host";
-          break;
-        default:
-          if (data.PUBSUB > 0) {
-            status = 'ok';
-            error_label = "";
-          } else {
-            status = 'warning';
-            error_label = "no consumers";
-          }
+      if (data.PUBSUB > 0) {
+        status = 'ok';
+        error_label = "";
+      } else {
+        status = 'warning';
+        error_label = "no consumers";
       }
 
       $(this.$.loader).removeClass('active');
