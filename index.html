@@ -98,19 +98,19 @@
 
       $(function() {
         $('api-status').each(function() {
-          let apiConfig = config[$(this).data('env')][$(this).data('name')];
+          var apiConfig = config[$(this).data('env')][$(this).data('name')];
           $(this).attr('url', apiConfig['endpoint']);
         });
 
         $('rabbitmq-consumer-status, queued-messages, timeout-queues').each(function() {
-          let consumerConfig = config[$(this).data('env')]['rabbitmq'];
+          var consumerConfig = config[$(this).data('env')]['rabbitmq'];
           $(this)
             .attr('vhost', consumerConfig['vhost'])
             .attr('url', consumerConfig['endpoint']);
         });
 
         $('redis-consumer-status').each(function() {
-          let consumerConfig = config[$(this).data('env')]['redis'];
+          var consumerConfig = config[$(this).data('env')]['redis'];
           $(this)
             .attr('url', consumerConfig['endpoint']);
         });

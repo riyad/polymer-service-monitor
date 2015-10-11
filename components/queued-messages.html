@@ -71,7 +71,7 @@
 
     ready: function() {
       this._points = [];
-      let options = {
+      var options = {
         series: {
           color: "#f44336", /* red 500 */
           threshold: [{
@@ -102,12 +102,12 @@
     },
 
     _handleResponse: function(e) {
-      let xhr = e.detail.xhr;
-      let data = xhr.response;
+      var xhr = e.detail.xhr;
+      var data = xhr.response;
 
       this._points.push([new Date(), data.messages]);
       // somehow it won't show anything if chart_data is the same every time
-      let chart_data = [this._points];
+      var chart_data = [this._points];
 
       $(this.$.loader).removeClass('active');
       this.$.chart.data = chart_data;

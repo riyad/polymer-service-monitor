@@ -64,16 +64,16 @@
     },
 
     _handleError: function(e, error) {
-      let xhr = error.request.xhr;
+      var xhr = error.request.xhr;
 
-      let status_elem = $(this.$.status);
-      let label_elem = $(this.$.label);
-      let error_label_elem = $(this.$.error_label);
-      let messages_count_elem = $(this.$.messages_count);
-      let status_elems = $([status_elem, label_elem]).map(function () {return this.toArray(); } );
-      let status = "";
-      let error_label = "";
-      let error_detail = "";
+      var status_elem = $(this.$.status);
+      var label_elem = $(this.$.label);
+      var error_label_elem = $(this.$.error_label);
+      var messages_count_elem = $(this.$.messages_count);
+      var status_elems = $([status_elem, label_elem]).map(function () {return this.toArray(); } );
+      var status = "";
+      var error_label = "";
+      var error_detail = "";
 
       switch(xhr.status) {
         case 0:
@@ -106,17 +106,17 @@
     },
 
     _handleResponse: function(e) {
-      let xhr = e.detail.xhr;
+      var xhr = e.detail.xhr;
 
-      let status_elem = $(this.$.status);
-      let label_elem = $(this.$.label);
-      let error_label_elem = $(this.$.error_label);
-      let messages_count_elem = $(this.$.messages_count);
-      let status_elems = $([status_elem, label_elem]).map(function () {return this.toArray(); } );
-      let status = "";
-      let error_label = "";
+      var status_elem = $(this.$.status);
+      var label_elem = $(this.$.label);
+      var error_label_elem = $(this.$.error_label);
+      var messages_count_elem = $(this.$.messages_count);
+      var status_elems = $([status_elem, label_elem]).map(function () {return this.toArray(); } );
+      var status = "";
+      var error_label = "";
 
-      let data = xhr.response;
+      var data = xhr.response;
       switch (xhr.status) {
         case 0:
           status = 'error';
@@ -139,9 +139,9 @@
 
     _updateUrl: function(url) {
       if (typeof url !== 'undefined' && url != null) {
-        let match = url.match(/^(https?:\/\/)(.+):(.+)@(.+)/i);
+        var match = url.match(/^(https?:\/\/)(.+):(.+)@(.+)/i);
         if (match !== null) {
-          let auth = `${match[2]}:${match[3]}`;
+          var auth = `${match[2]}:${match[3]}`;
           url = `${match[1]}${match[4]}`;
           this.$.ajax.headers = {"Authorization": `Basic ${btoa(auth)}`}
         }

@@ -72,12 +72,12 @@
     },
 
     _computeCurrentValue: function () {
-      let data_values_for_series = this._dataValues();
+      var data_values_for_series = this._dataValues();
       return data_values_for_series.map(function(series) {return series[series.length-1]}).reduce(function(sum, val){return sum+val;}, 0);
     },
 
     _computeMaxValue: function () {
-      let data_values_for_series = this._dataValues();
+      var data_values_for_series = this._dataValues();
       if (data_values_for_series.length === 0) {
         return 0;
       }
@@ -85,7 +85,7 @@
     },
 
     _computeMinValue: function() {
-      let data_values_for_series = this._dataValues();
+      var data_values_for_series = this._dataValues();
       if (data_values_for_series.length === 0) {
         return 0;
       }

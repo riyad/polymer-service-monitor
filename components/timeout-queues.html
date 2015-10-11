@@ -76,7 +76,7 @@
     ],
 
     ready: function() {
-      let options = {
+      var options = {
         colors: [
           '#6dcdf9', /* light blue 200 */
           '#03a9f9', /* light blue 600 */
@@ -86,7 +86,7 @@
         ],
       };
       this._chart_data = [];
-      for (let gen=0; gen < this.generations; gen++) {
+      for (var gen=0; gen < this.generations; gen++) {
         this._chart_data.push({
           label: "Generation "+gen,
           data: [],
@@ -111,14 +111,14 @@
     },
 
     _handleResponse: function(e) {
-      let xhr = e.detail.xhr;
-      let data = xhr.response;
+      var xhr = e.detail.xhr;
+      var data = xhr.response;
 
-      let counts = new Array(this.generations);
+      var counts = new Array(this.generations);
       counts.fill(0);
-      for (let queue of data) {
+      for (var queue of data) {
         if (queue.name.startsWith(this.namePrefix)) {
-          for (let gen=0; gen < this.generations; gen++) {
+          for (var gen=0; gen < this.generations; gen++) {
             if (queue.name.indexOf(this.generationPrefix + gen) != -1) {
               counts[gen]++;
             }
@@ -126,14 +126,14 @@
         }
       }
 
-      let d = new Date();
-      for (let gen=0; gen < this.generations; gen++) {
+      var d = new Date();
+      for (var gen=0; gen < this.generations; gen++) {
         this._chart_data[gen].data.push([d, counts[gen]]);
       }
 
       // somehow it won't show anything if chart_data is the same every time
-      let new_chart_data = [];
-      for (let gen=0; gen < this.generations; gen++) {
+      var new_chart_data = [];
+      for (var gen=0; gen < this.generations; gen++) {
         new_chart_data.push(this._chart_data[gen]);
       }
       this._chart_data = new_chart_data;

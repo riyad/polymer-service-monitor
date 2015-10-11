@@ -78,7 +78,7 @@
         .on('plothover', this._onPlotHover.bind(this));
     },
     _optionsChanged: function (newValue, oldValue) {
-      let options = $.extend(true, this.defaultOptions, newValue);
+      var options = $.extend(true, this.defaultOptions, newValue);
       this.$.chart.options = options;
     },
     _isSamePlotItem: function(d1, d2) {
@@ -88,11 +88,11 @@
             && d1.dataIndex === d2.dataIndex;
     },
     _onPlotHover: function (event, pos, item) {
-      let chart_elem = $(this.$.chart);
+      var chart_elem = $(this.$.chart);
       if (item) {
-        let date = new Date(item.datapoint[0]);
-        let count = item.datapoint[1];
-        let tooltip_html = "" + count + " " + this.itemName + " " + $.format.prettyDate(date);
+        var date = new Date(item.datapoint[0]);
+        var count = item.datapoint[1];
+        var tooltip_html = "" + count + " " + this.itemName + " " + $.format.prettyDate(date);
         if (item.series.label) {
           tooltip_html = item.series.label + "<br/>" + tooltip_html;
         }

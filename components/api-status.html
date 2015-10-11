@@ -64,15 +64,15 @@
     },
 
     _handleError: function(e, error) {
-      let xhr = error.request.xhr;
+      var xhr = error.request.xhr;
 
-      let status_elem = $(this.$.status);
-      let error_label_elem = $(this.$.error_label);
-      let status = "";
-      let error_label = "";
-      let error_detail = "";
+      var status_elem = $(this.$.status);
+      var error_label_elem = $(this.$.error_label);
+      var status = "";
+      var error_label = "";
+      var error_detail = "";
 
-      let data = this._parseResponseError(xhr);
+      var data = this._parseResponseError(xhr);
       switch(xhr.status) {
         case 0:
           status = 'error';
@@ -110,12 +110,12 @@
     },
 
     _handleResponse: function(e) {
-      let xhr = e.detail.xhr;
+      var xhr = e.detail.xhr;
 
-      let status_elem = $(this.$.status);
-      let error_label_elem = $(this.$.error_label);
-      let status = "";
-      let error_label = "";
+      var status_elem = $(this.$.status);
+      var error_label_elem = $(this.$.error_label);
+      var status = "";
+      var error_label = "";
 
       switch (xhr.status) {
         case 0:
@@ -134,7 +134,7 @@
 
     _parseResponseError: function (xhr) {
       try {
-        let data = JSON.parse(xhr.response);
+        var data = JSON.parse(xhr.response);
         if (!('error' in data)) {
           data.error = xhr.statusText;
         }
