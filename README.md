@@ -1,7 +1,7 @@
 Service Monitor
 ===============
 
-This is a simple tool for keeping tabs on the services you're running.
+This is a simple tool for keeping tabs on the services you're running (built with Polymer).
 
 # Available Elements
 
