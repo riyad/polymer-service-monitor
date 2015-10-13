@@ -27,6 +27,7 @@
         id="ajax"
         handle-as="json"
         on-response="_handleResponse"
+        on-error="_handleError"
         on-request="_handleLoading">
     </iron-ajax>
     <div class="ui middle aligned grid">
@@ -95,6 +96,10 @@
           this.refreshInterval*SECONDS
         );
       }
+    },
+
+    _handleError: function(e, error) {
+      $(this.$.loader).removeClass('active');
     },
 
     _handleLoading: function() {
