@@ -145,8 +145,13 @@
     },
 
     _updateUrl: function(url) {
-      if (typeof url !== 'undefined' && url != null) {
-        this.$.ajax.url = url;
+      if (typeof url !== undefined && url != null) {
+        var match = url.match(/^(\w+:\/\/)((.*):(.*)@)?(.+)/i);
+        if (match[2] !== undefined) {
+          this.$.ajax.headers = { 'Authorization': `Basic ${btoa(`${match[3]}:${match[4]}`)}` };
+          this.$.ajax.withCredentials = true;
+        }
+        this.$.ajax.url = `${match[1]}${match[5]}`;
         this.$.ajax.generateRequest();
       }
     },

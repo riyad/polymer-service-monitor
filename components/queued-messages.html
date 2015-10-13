@@ -115,11 +115,16 @@
     },
 
     _updateUrl: function(url, vhost, name) {
-      if (typeof url !== 'undefined' && url != null
-          && typeof vhost !== 'undefined' && vhost != null) {
+      if (typeof url !== undefined && url != null
+          && typeof vhost !== undefined && vhost != null) {
         name = encodeURIComponent(name);
         vhost = encodeURIComponent(vhost);
-        this.$.ajax.url = url + '/api/queues/' + vhost + '/' + name;
+        var match = url.match(/^(\w+:\/\/)((.*):(.*)@)?(.+)/i);
+        if (match[2] !== undefined) {
+          this.$.ajax.headers = { 'Authorization': `Basic ${btoa(`${match[3]}:${match[4]}`)}` };
+          this.$.ajax.withCredentials = true;
+        }
+        this.$.ajax.url = `${match[1]}${match[5]}/api/queues/${vhost}/${name}`;
         this.$.ajax.generateRequest();
       }
     },

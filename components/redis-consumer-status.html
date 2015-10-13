@@ -131,14 +131,13 @@
     },
 
     _updateUrl: function(url) {
-      if (typeof url !== 'undefined' && url != null) {
-        var match = url.match(/^(https?:\/\/)(.+):(.+)@(.+)/i);
-        if (match !== null) {
-          var auth = `${match[2]}:${match[3]}`;
-          url = `${match[1]}${match[4]}`;
-          this.$.ajax.headers = {"Authorization": `Basic ${btoa(auth)}`}
+      if (typeof url !== undefined && url != null) {
+        var match = url.match(/^(\w+:\/\/)((.*):(.*)@)?(.+)/i);
+        if (match[2] !== undefined) {
+          this.$.ajax.headers = { 'Authorization': `Basic ${btoa(`${match[3]}:${match[4]}`)}` };
+          this.$.ajax.withCredentials = true;
         }
-        this.$.ajax.url = `${url}/PUBSUB/NUMPAT`;
+        this.$.ajax.url = `${match[1]}${match[5]}/PUBSUB/NUMPAT`;
         this.$.ajax.generateRequest();
       }
     },
