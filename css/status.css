@@ -1,16 +1,23 @@
 
-.inverted.default.label {
-  background-color: white;
+#pop-queues .sub.header {
+  display: inline;
+}
+
+.default.basic.label {
+  background: none;
   color: rgba(0,0,0,.84)!important;
 }
-.inverted.error.label {
-  background-color: #e74b47;
+.error.basic.label {
+  background: none;
+  color: rgba(255,255,255,.84);
 }
-.inverted.ok.label {
-  background-color: #4caf50;
+.ok.basic.label {
+  background: none;
+  color: rgba(255,255,255,.84);
 }
-.inverted.warning.label {
-  background-color: #eba500;
+.warning.basic.label {
+  background: none;
+  color: rgba(255,255,255,.84);
 }
 
 
