@@ -11,8 +11,8 @@
     "iron-ajax": "PolymerElements/iron-ajax",
     "jquery": "jquery#>= 2.1.4",
     "jquery-dateFormat": "jquery-dateFormat#>= 1.0.1",
-    "polymer": "Polymer/polymer#^1.2.0",
+    "polymer": "Polymer/polymer#^1.4.0",
     "polymer-flot": "riyad/polymer-flot",
-    "semantic-ui": "semantic-ui#^2.1.0"
+    "semantic-ui": "semantic-ui#^2.1.8"
   }
 }
